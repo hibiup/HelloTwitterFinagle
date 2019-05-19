@@ -1,7 +1,6 @@
 package com.hibiup.finagle.http
 
-import com.twitter.finagle.{Http, Service}
-import com.twitter.finagle.http
+import com.twitter.finagle.{Http, ListeningServer, Service, http}
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.util.{Await, Future, FuturePool}
 import org.slf4j.LoggerFactory
@@ -15,6 +14,9 @@ object SimpleFinagleHttpService extends App{
       * 缺省将执行在当前线程中（阻塞）。
       * */
     val service = new Service[http.Request, http.Response] {
+        /**
+          * 当一个 Service 被调用的时候,它返回一个 Future
+          * */
         def apply(req: http.Request): Future[http.Response] =
             Future.value {
                 logger.debug(req.version.versionString)
@@ -23,10 +25,10 @@ object SimpleFinagleHttpService extends App{
     }
 
     /**
-      * Http.serve 将服务绑定到一个端口上，然后启动它。
+      * 注册 Service, 返回一个 ListeningServer:
       **/
-    val server = Http.serve(":8088", service)
-    Await.ready(server) // 阻塞
+    val server: ListeningServer = Http.serve(":8088", service)
+    Await.ready(server) // 阻塞等待 ListeningServer
 }
 
 object FinagleHttpProxy extends App {
